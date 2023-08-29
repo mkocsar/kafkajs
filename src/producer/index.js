@@ -238,6 +238,9 @@ module.exports = ({
     },
     events,
     on,
+    prefetchTopicMetadata: async (topics = []) => {
+      await cluster.prefetchMetadata(topics)
+    },
     send,
     sendBatch,
     transaction,

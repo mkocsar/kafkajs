@@ -201,6 +201,17 @@ module.exports = class Cluster {
 
   /**
    * @public
+   * @param {string[]} topics
+   * @returns {Promise}
+   */
+  async prefetchMetadata(topics) {
+    await this.brokerPool.refreshMetadata(topics)
+    const topicsWithMetadata = this.brokerPool.getTopicsWithMetadata()
+    await this.addMultipleTargetTopics(topicsWithMetadata, true)
+  }
+
+  /**
+   * @public
    * @param {string} topic
    * @return {Promise}
    */
@@ -213,7 +224,7 @@ module.exports = class Cluster {
    * @param {string[]} topics
    * @return {Promise}
    */
-  async addMultipleTargetTopics(topics) {
+  async addMultipleTargetTopics(topics, skipRefresh = false) {
     await this.mutatingTargetTopics.acquire()
 
     try {
@@ -225,7 +236,7 @@ module.exports = class Cluster {
 
       const hasChanged = previousSize !== this.targetTopics.size || !this.brokerPool.metadata
 
-      if (hasChanged) {
+      if (hasChanged && !skipRefresh) {
         try {
           await this.refreshMetadata()
         } catch (e) {

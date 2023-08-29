@@ -185,8 +185,9 @@ export interface CoordinatorMetadata {
 export type Cluster = {
   getNodeIds(): number[]
   metadata(): Promise<BrokerMetadata>
+  prefetchMetadata(topics: string[]): Promise<void>
   removeBroker(options: { host: string; port: number }): void
-  addMultipleTargetTopics(topics: string[]): Promise<void>
+  addMultipleTargetTopics(topics: string[], skipRefresh?: boolean): Promise<void>
   isConnected(): boolean
   connect(): Promise<void>
   disconnect(): Promise<void>
@@ -813,6 +814,7 @@ export type Producer = Sender & {
     eventName: ValueOf<ProducerEvents>,
     listener: (event: InstrumentationEvent<any>) => void
   ): RemoveInstrumentationEventListener<typeof eventName>
+  prefetchTopicMetadata(topics?: string[]): Promise<void>
   transaction(): Promise<Transaction>
   logger(): Logger
 }
