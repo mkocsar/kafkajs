@@ -773,6 +773,7 @@ export interface Offsets {
 }
 
 type Sender = {
+  prefetchTopicMetadata(topics?: string[]): Promise<void>
   send(record: ProducerRecord): Promise<RecordMetadata[]>
   sendBatch(batch: ProducerBatch): Promise<RecordMetadata[]>
 }
@@ -814,7 +815,6 @@ export type Producer = Sender & {
     eventName: ValueOf<ProducerEvents>,
     listener: (event: InstrumentationEvent<any>) => void
   ): RemoveInstrumentationEventListener<typeof eventName>
-  prefetchTopicMetadata(topics?: string[]): Promise<void>
   transaction(): Promise<Transaction>
   logger(): Logger
 }

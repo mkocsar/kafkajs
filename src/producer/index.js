@@ -65,6 +65,8 @@ module.exports = ({
     transactionalId,
   })
 
+  const prefetchTopicMetadata = async (topics = []) => await cluster.prefetchMetadata(topics);
+
   const { send, sendBatch } = createMessageProducer({
     logger,
     cluster,
@@ -162,6 +164,7 @@ module.exports = ({
     }
 
     return {
+      prefetchTopicMetadata,
       sendBatch: transactionGuard(sendBatchTxn),
       send: transactionGuard(sendTxn),
       /**
@@ -238,9 +241,7 @@ module.exports = ({
     },
     events,
     on,
-    prefetchTopicMetadata: async (topics = []) => {
-      await cluster.prefetchMetadata(topics)
-    },
+    prefetchTopicMetadata,
     send,
     sendBatch,
     transaction,

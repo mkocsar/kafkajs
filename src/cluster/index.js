@@ -205,9 +205,16 @@ module.exports = class Cluster {
    * @returns {Promise}
    */
   async prefetchMetadata(topics) {
-    await this.brokerPool.refreshMetadata(topics)
-    const topicsWithMetadata = this.brokerPool.getTopicsWithMetadata()
-    await this.addMultipleTargetTopics(topicsWithMetadata, true)
+    if (topics.length > 0) {
+      await this.addMultipleTargetTopics(topics, true)
+    } else {
+      await this.brokerPool.refreshMetadata([])
+      const topicsWithMetadata = this.brokerPool.getTopicsWithMetadata()
+
+      await this.mutatingTargetTopics.acquire()
+      this.targetTopics = new Set(topicsWithMetadata)
+      await this.mutatingTargetTopics.release()
+    }
   }
 
   /**
@@ -224,7 +231,7 @@ module.exports = class Cluster {
    * @param {string[]} topics
    * @return {Promise}
    */
-  async addMultipleTargetTopics(topics, skipRefresh = false) {
+  async addMultipleTargetTopics(topics, forceMetadataRefresh = false) {
     await this.mutatingTargetTopics.acquire()
 
     try {
@@ -236,7 +243,7 @@ module.exports = class Cluster {
 
       const hasChanged = previousSize !== this.targetTopics.size || !this.brokerPool.metadata
 
-      if (hasChanged && !skipRefresh) {
+      if (hasChanged || forceMetadataRefresh) {
         try {
           await this.refreshMetadata()
         } catch (e) {
