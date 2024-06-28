@@ -146,6 +146,14 @@ module.exports = class BrokerPool {
 
   /**
    * @public
+   * @returns {Array<String>}
+   */
+  getTopicsWithMetadata() {
+    return this.metadata.topicMetadata.map(metadata => metadata.topic)
+  }
+
+  /**
+   * @public
    * @param {Array<String>} topics
    * @returns {Promise<null>}
    */

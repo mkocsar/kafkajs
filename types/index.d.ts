@@ -185,8 +185,9 @@ export interface CoordinatorMetadata {
 export type Cluster = {
   getNodeIds(): number[]
   metadata(): Promise<BrokerMetadata>
+  prefetchMetadata(topics: string[]): Promise<void>
   removeBroker(options: { host: string; port: number }): void
-  addMultipleTargetTopics(topics: string[]): Promise<void>
+  addMultipleTargetTopics(topics: string[], skipRefresh?: boolean): Promise<void>
   isConnected(): boolean
   connect(): Promise<void>
   disconnect(): Promise<void>
@@ -772,6 +773,7 @@ export interface Offsets {
 }
 
 type Sender = {
+  prefetchTopicMetadata(topics?: string[]): Promise<void>
   send(record: ProducerRecord): Promise<RecordMetadata[]>
   sendBatch(batch: ProducerBatch): Promise<RecordMetadata[]>
 }
